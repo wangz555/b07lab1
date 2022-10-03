@@ -1,40 +1,73 @@
+import java.io.*;
+import java.util.Scanner;
 public class Polynomial{
     private double[] coefficient;
+    private int[] exponents;
     //constructor1
     public Polynomial(){
         coefficient = new double[0];
+        exponents = new int[0];
+        //array equals to null
     }
     //constructor2
-    public Polynomial(double[] coefficient){
+    public Polynomial(double[] coefficient, int[] exponents){
         this.coefficient = coefficient;
+        this.exponents = exponents;
     }
-    public Polynomial add(Polynomial other){
-        double[] coeff;
-        int len1 = this.coefficient.length;
-        int len2 = other.coefficient.length;
+    //constructor3
+    public Polynomial(File myfile) throws IOException{
+        Scanner file = new Scanner(myfile);
+        String line = file.nextLine();
+        file.close();
 
-        if(len1 < len2){
-            coeff = new double[len2];
+        line = line.replace("-","+-");
+        String[] poly = line.split("\\+");
+
+        this.coefficient = new double[poly.length];
+        this.exponents = new int[poly.length];
+
+
+        for(int i =0; i < poly.length; i++){
+            String[] str = poly[i].split("x");
+            this.coefficient[i] = Double.parseDouble(str[0]);
+            if(str.length ==1){
+                this.exponents[i] = 0;
+            }
+            else{
+                this.exponents[i] = Integer.parseInt(str[1]);
+            }
         }
-        else{
-            coeff = new double[len1];
-        }
-        for(int i=0;i<len1;i++){
-            coeff[i]= coeff[i] + this.coefficient[i];
-        }
-        for(int i=0;i<len2;i++){
-            coeff[i]= coeff[i] + other.coefficient[i];
-        }
-        return new Polynomial(coeff);
     }
+    //public Polynomial add(Polynomial other){}
     public double evaluate(double val){
         double result = 0.0;
         for(int i =0; i<this.coefficient.length;i++){
-            result = result + this.coefficient[i]*Math.pow(val,i);
+            result = result + this.coefficient[i]*Math.pow(val,this.exponents[i]);
         }
         return result;
     }
     public boolean hasRoot(double val){
         return this.evaluate(val)==0.0;
+    }
+
+    public void saveToFile(String file) throws IOException{
+        FileWriter writeTXT = new FileWriter(file);
+        String newline = "";
+        int i,j;
+        if(this.exponents[0]==0){
+            newline += this.coefficient[0]+  "+";
+            for (i = 1; i < this.coefficient.length -1; i++){
+                newline += this.coefficient[i] + "x" + this.exponents[i] + "+";
+            }
+            newline += this.coefficient[i] + "x" + this.exponents[i];
+        }
+        else{
+            for (j =0; j<this.coefficient.length - 1;j++){
+                newline += this.coefficient[j] + "x" + this.exponents[j] + "+";
+            }
+            newline += this.coefficient[j] + "x" + this.exponents[j];
+        }
+        writeTXT.write(newline);
+        writeTXT.close();
     }
 }
